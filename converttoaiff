@@ -32,7 +32,7 @@ convert () {
 
 echo 'Please be patient! Depending on your system this will take 10 minutes!'
 echo 'Creating the Introduction audio file.'
-cat intro_p*.txt | say -o introduction_.aiff
+cat intro_p*.txt | say -o introduction.aiff
 
 echo 'Creating the tablet1.aiff audio file.'
 cat tablet1_p*.txt | say -o tablet1.aiff
@@ -95,6 +95,6 @@ if [ "$1" != "" ]; then
     done
 fi
 
-# show a flailer some help
+# show some help
 help
 exit 0
