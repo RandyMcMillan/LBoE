@@ -1,0 +1,101 @@
+#!/bin/bash
+set -e
+
+help () {
+    cat<<EOF
+
+Usage: converttoaiff [convert|help]
+
+Commands:
+
+    converttoaiff   use bash command to generate audio files from text
+
+    Open Terminal.App (for Mac)
+    Navigate to the folder where this file is located
+    type into the command line "sudo ./converttoaiff convert" without quotes
+    Enter Password
+    Wait...
+    help       print this msg
+
+EOF
+}
+
+
+convert () {
+
+
+#ls > list.txt
+
+#files=$(cat ./list.txt)
+
+
+
+echo 'Please be patient! Depending on your system this will take 10 minutes!'
+echo 'Creating the Introduction audio file.'
+cat intro_p*.txt | say -o introduction_.aiff
+
+echo 'Creating the tablet1.aiff audio file.'
+cat tablet1_p*.txt | say -o tablet1.aiff
+
+echo 'Creating the tablet2.aiff audio file.'
+cat tablet2_p*.txt | say -o tablet2.aiff
+
+echo 'Creating the tablet3.aiff audio file.'
+cat tablet3_p*.txt | say -o tablet3.aiff
+
+echo 'Creating the tablet4.aiff audio file.'
+cat tablet4_p*.txt | say -o tablet4.aiff
+
+echo 'Creating the tablet5.aiff audio file.'
+cat tablet5_p*.txt | say -o tablet5.aiff
+
+echo 'Creating the tablet6.aiff audio file.'
+cat tablet6_p*.txt | say -o tablet6.aiff
+
+echo 'Creating the tablet7.aiff audio file.'
+cat tablet7_p*.txt | say -o tablet7.aiff
+
+echo 'Creating the tablet8.aiff audio file.'
+cat tablet8_p*.txt | say -o tablet8.aiff
+
+echo 'Creating the tablet9.aiff audio file.'
+cat tablet9_p*.txt | say -o tablet9.aiff
+
+echo 'Creating the tablet10.aiff audio file.'
+cat tablet10_p*.txt | say -o tablet10.aiff
+
+echo 'Creating the tablet11.aiff audio file.'
+cat tablet11_p*.txt | say -o tablet11.aiff
+
+echo 'Creating the tablet12.aiff audio file.'
+cat tablet12_p*.txt | say -o tablet12.aiff
+
+echo 'Creating the tablet13.aiff audio file.'
+cat tablet13_p*.txt | say -o tablet13.aiff
+
+echo 'Creating the tablet14.aiff audio file.'
+cat tablet14_p*.txt | say -o tablet14.aiff
+
+echo 'Creating the glossary.aiff audio file.'
+cat glossary_p*.txt | say -o glossary.aiff
+
+}
+
+
+
+# fucking cryptic bash, test for a valid arg and execute it if so; otherwise show the help
+if [ "$1" != "" ]; then
+    wl=(convert  help)
+    for i in "${wl[@]}"
+    do
+        if [ "$i" == "$1" ]
+        then
+            $1
+            exit 0
+        fi
+    done
+fi
+
+# show a flailer some help
+help
+exit 0
