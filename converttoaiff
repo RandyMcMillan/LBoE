@@ -83,7 +83,6 @@ cat glossary_p*.txt | say -o glossary.aiff
 
 
 
-# fucking cryptic bash, test for a valid arg and execute it if so; otherwise show the help
 if [ "$1" != "" ]; then
     wl=(convert  help)
     for i in "${wl[@]}"
