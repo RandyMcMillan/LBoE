@@ -1,5 +1,6 @@
 *
+!.gitignore
 !p*
 !*.txt
 !*.md
-!.gitignore
+!README*
