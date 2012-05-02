@@ -6,4 +6,5 @@
 ######Raw Text by page number.  
 ######bash command to convert text to .aiff audio files. 
     
+    $ cd LBoE
     $ sudo ./converttoaiff convert
