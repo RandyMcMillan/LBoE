@@ -9,4 +9,4 @@
 
 ######Navigate to /LBoE in the terminal
     
-    $ sudo ./converttoaiff convert
+    $ ./converttoaiff convert
