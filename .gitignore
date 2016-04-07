@@ -4,5 +4,6 @@
 !p*
 !*.txt
 !*.md
+!*.htm*
 !README*
 !convert*
