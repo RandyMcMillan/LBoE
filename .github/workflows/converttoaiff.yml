@@ -3,7 +3,7 @@ name: Convert Text to AIFF
 on:
   push:
     branches:
-      - main
+      - ma*
     paths:
       - '**/*_p*.txt'
       - 'converttoaiff'
