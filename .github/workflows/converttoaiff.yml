@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y speech-dispatcher ffmpeg
+          sudo apt-get install -y espeak ffmpeg
       
       - name: Make converttoaiff executable
         run: chmod +x converttoaiff
