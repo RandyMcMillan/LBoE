@@ -9,6 +9,7 @@ Usage: converttoaiff [convert|help]
 Commands:
 
     converttoaiff   use bash command to generate audio files from text
+                   Now supports parallel background jobs for faster processing!
 
     Open Terminal.App (for Mac)
     Navigate to the folder where this file is located
@@ -45,70 +46,86 @@ convert () {
     # Detect TTS command at runtime
     detect_tts_command
 
-    echo 'Please be patient! Depending on your system this will take 10 minutes!'
-    echo 'Creating the Introduction audio file.'
-    cat intro_p*.txt | $TTS_CMD -o introduction.aiff
-    afconvert -d 'aac ' -f 'mp4f' introduction.aiff
-
-    echo 'Creating the tablet1.aiff audio file.'
-    cat tablet1_p*.txt | $TTS_CMD -o tablet1.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet1.aiff
-
-    echo 'Creating the tablet2.aiff audio file.'
-    cat tablet2_p*.txt | $TTS_CMD -o tablet2.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet2.aiff
-
-    echo 'Creating the tablet3.aiff audio file.'
-    cat tablet3_p*.txt | $TTS_CMD -o tablet3.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet3.aiff
-
-    echo 'Creating the tablet4.aiff audio file.'
-    cat tablet4_p*.txt | $TTS_CMD -o tablet4.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet4.aiff
-
-    echo 'Creating the tablet5.aiff audio file.'
-    cat tablet5_p*.txt | $TTS_CMD -o tablet5.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet5.aiff
-
-    echo 'Creating the tablet6.aiff audio file.'
-    cat tablet6_p*.txt | $TTS_CMD -o tablet6.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet6.aiff
-
-    echo 'Creating the tablet7.aiff audio file.'
-    cat tablet7_p*.txt | $TTS_CMD -o tablet7.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet7.aiff
-
-    echo 'Creating the tablet8.aiff audio file.'
-    cat tablet8_p*.txt | $TTS_CMD -o tablet8.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet8.aiff
-
-    echo 'Creating the tablet9.aiff audio file.'
-    cat tablet9_p*.txt | $TTS_CMD -o tablet9.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet9.aiff
-
-    echo 'Creating the tablet10.aiff audio file.'
-    cat tablet10_p*.txt | $TTS_CMD -o tablet10.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet10.aiff
-
-    echo 'Creating the tablet11.aiff audio file.'
-    cat tablet11_p*.txt | $TTS_CMD -o tablet11.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet11.aiff
-
-    echo 'Creating the tablet12.aiff audio file.'
-    cat tablet12_p*.txt | $TTS_CMD -o tablet12.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet12.aiff
-
-    echo 'Creating the tablet13.aiff audio file.'
-    cat tablet13_p*.txt | $TTS_CMD -o tablet13.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet13.aiff
- 
-    echo 'Creating the tablet14.aiff audio file.'
-    cat tablet14_p*.txt | $TTS_CMD -o tablet14.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet14.aiff
-
-    echo 'Creating the glossary.aiff audio file.'
-    cat glossary_p*.txt | $TTS_CMD -o glossary.aiff
-    afconvert -d 'aac ' -f 'mp4f' glossary.aiff
+    # Maximum number of concurrent jobs to prevent resource overload
+    # Adjust based on CPU cores - conservative default
+    MAX_JOBS=${MAX_JOBS:-4}
+    
+    echo 'Please be patient! Now using parallel processing for faster conversion!'
+    echo "Running up to $MAX_JOBS concurrent jobs..."
+    
+    # Function to process a single audio file in the background
+    process_audio() {
+        local pattern="$1"
+        local output="$2"
+        local label="$3"
+        
+        echo "Starting $label..."
+        cat $pattern | $TTS_CMD -o "$output"
+        afconvert -d 'aac ' -f 'mp4f' "$output"
+        echo "Completed $label."
+    }
+    
+    # Function to wait for background jobs to stay under limit
+    wait_for_job_slot() {
+        while [ $(jobs -r | wc -l) -ge $MAX_JOBS ]; do
+            sleep 0.5
+        done
+    }
+    
+    # Start all conversions as background jobs with controlled parallelism
+    wait_for_job_slot
+    process_audio "intro_p*.txt" "introduction.aiff" "Introduction" &
+    
+    wait_for_job_slot
+    process_audio "tablet1_p*.txt" "tablet1.aiff" "tablet1" &
+    
+    wait_for_job_slot
+    process_audio "tablet2_p*.txt" "tablet2.aiff" "tablet2" &
+    
+    wait_for_job_slot
+    process_audio "tablet3_p*.txt" "tablet3.aiff" "tablet3" &
+    
+    wait_for_job_slot
+    process_audio "tablet4_p*.txt" "tablet4.aiff" "tablet4" &
+    
+    wait_for_job_slot
+    process_audio "tablet5_p*.txt" "tablet5.aiff" "tablet5" &
+    
+    wait_for_job_slot
+    process_audio "tablet6_p*.txt" "tablet6.aiff" "tablet6" &
+    
+    wait_for_job_slot
+    process_audio "tablet7_p*.txt" "tablet7.aiff" "tablet7" &
+    
+    wait_for_job_slot
+    process_audio "tablet8_p*.txt" "tablet8.aiff" "tablet8" &
+    
+    wait_for_job_slot
+    process_audio "tablet9_p*.txt" "tablet9.aiff" "tablet9" &
+    
+    wait_for_job_slot
+    process_audio "tablet10_p*.txt" "tablet10.aiff" "tablet10" &
+    
+    wait_for_job_slot
+    process_audio "tablet11_p*.txt" "tablet11.aiff" "tablet11" &
+    
+    wait_for_job_slot
+    process_audio "tablet12_p*.txt" "tablet12.aiff" "tablet12" &
+    
+    wait_for_job_slot
+    process_audio "tablet13_p*.txt" "tablet13.aiff" "tablet13" &
+    
+    wait_for_job_slot
+    process_audio "tablet14_p*.txt" "tablet14.aiff" "tablet14" &
+    
+    wait_for_job_slot
+    process_audio "glossary_p*.txt" "glossary.aiff" "glossary" &
+    
+    # Wait for all background jobs to complete
+    echo "Waiting for all conversions to complete..."
+    wait
+    
+    echo "All audio files have been generated successfully!"
 }
 
 if [ "$1" != "" ]; then
