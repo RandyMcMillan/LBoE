@@ -9,6 +9,4 @@
 
 ###### Navigate to /LBoE in the terminal
 
-'''shell    
-./converttoaiff convert
-'''
+    ./converttoaiff convert
