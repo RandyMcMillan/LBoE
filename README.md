@@ -4,7 +4,7 @@
 
       
 ###### Raw Text by page number.  
-######Bash command to convert text to .aiff audio files. 
+###### Bash command to convert text to .aiff audio files. 
     
 
 ######Navigate to /LBoE in the terminal
