@@ -28,9 +28,9 @@ detect_tts_command() {
     elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
         # Linux
         if command -v spd-say &> /dev/null; then
-            TTS_CMD="spd-say"
+            TTS_CMD="spd-say -e"
         else
-            echo "Error: spd-say not found. Please install speech-dispatcher."
+             echo "Error: spd-say not found. Please install speech-dispatcher."
             exit 1
         fi
     else
