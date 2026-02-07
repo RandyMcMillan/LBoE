@@ -82,18 +82,20 @@ convert_file() {
     # Generate TTS audio
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS: say reads from stdin
-        cat ${input_pattern} | $TTS_CMD $TTS_OUTPUT_FLAG ${output_name}.aiff
+        cat ${input_pattern} | $TTS_CMD $TTS_OUTPUT_FLAG "${output_name}.aiff"
     else
-        # Linux: espeak reads from file, use process substitution
-        $TTS_CMD -f <(cat ${input_pattern}) $TTS_OUTPUT_FLAG ${output_name}.aiff
+        # Linux: espeak reads from file, use process substitution to handle wildcards
+        # Process substitution is needed because input_pattern may expand to multiple files
+        $TTS_CMD -f <(cat ${input_pattern}) $TTS_OUTPUT_FLAG "${output_name}.aiff"
     fi
     
     # Convert to m4a format
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        afconvert -d 'aac ' -f 'mp4f' ${output_name}.aiff
+        afconvert -d 'aac ' -f 'mp4f' "${output_name}.aiff"
     else
         # Linux uses ffmpeg to convert WAV to m4a
-        ffmpeg -i ${output_name}.aiff -c:a aac -b:a 128k -y ${output_name}.m4a 2>/dev/null
+        # Suppress most ffmpeg output but keep errors
+        ffmpeg -i "${output_name}.aiff" -c:a aac -b:a 128k -y "${output_name}.m4a" -loglevel error 2>&1
     fi
     
     echo "Completed ${output_name}"
