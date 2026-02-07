@@ -20,84 +20,96 @@ Commands:
 EOF
 }
 
-
-convert () {
-
-
-#ls > list.txt
-
-#files=$(cat ./list.txt)
-
-
-
-echo 'Please be patient! Depending on your system this will take 10 minutes!'
-echo 'Creating the Introduction audio file.'
-cat intro_p*.txt | say -o introduction.aiff
-afconvert -d 'aac ' -f 'mp4f' introduction.aiff
-
-echo 'Creating the tablet1.aiff audio file.'
-cat tablet1_p*.txt | say -o tablet1.aiff
-afconvert -d 'aac ' -f 'mp4f' tablet1.aiff
-
-echo 'Creating the tablet2.aiff audio file.'
-cat tablet2_p*.txt | say -o tablet2.aiff
-afconvert -d 'aac ' -f 'mp4f' tablet2.aiff
-
-echo 'Creating the tablet3.aiff audio file.'
-cat tablet3_p*.txt | say -o tablet3.aiff
-afconvert -d 'aac ' -f 'mp4f' tablet3.aiff
-
-echo 'Creating the tablet4.aiff audio file.'
-cat tablet4_p*.txt | say -o tablet4.aiff
-afconvert -d 'aac ' -f 'mp4f' tablet4.aiff
-
-echo 'Creating the tablet5.aiff audio file.'
-cat tablet5_p*.txt | say -o tablet5.aiff
-afconvert -d 'aac ' -f 'mp4f' tablet5.aiff
-
-echo 'Creating the tablet6.aiff audio file.'
-cat tablet6_p*.txt | say -o tablet6.aiff
-afconvert -d 'aac ' -f 'mp4f' tablet6.aiff
-
-echo 'Creating the tablet7.aiff audio file.'
-cat tablet7_p*.txt | say -o tablet7.aiff
-afconvert -d 'aac ' -f 'mp4f' tablet7.aiff
-
-echo 'Creating the tablet8.aiff audio file.'
-cat tablet8_p*.txt | say -o tablet8.aiff
-afconvert -d 'aac ' -f 'mp4f' tablet8.aiff
-
-echo 'Creating the tablet9.aiff audio file.'
-cat tablet9_p*.txt | say -o tablet9.aiff
-afconvert -d 'aac ' -f 'mp4f' tablet9.aiff
-
-echo 'Creating the tablet10.aiff audio file.'
-cat tablet10_p*.txt | say -o tablet10.aiff
-afconvert -d 'aac ' -f 'mp4f' tablet10.aiff
-
-echo 'Creating the tablet11.aiff audio file.'
-cat tablet11_p*.txt | say -o tablet11.aiff
-afconvert -d 'aac ' -f 'mp4f' tablet11.aiff
-
-echo 'Creating the tablet12.aiff audio file.'
-cat tablet12_p*.txt | say -o tablet12.aiff
-afconvert -d 'aac ' -f 'mp4f' tablet12.aiff
-
-echo 'Creating the tablet13.aiff audio file.'
-cat tablet13_p*.txt | say -o tablet13.aiff
-afconvert -d 'aac ' -f 'mp4f' tablet13.aiff
- 
-echo 'Creating the tablet14.aiff audio file.'
-cat tablet14_p*.txt | say -o tablet14.aiff
-afconvert -d 'aac ' -f 'mp4f' tablet14.aiff
-
-echo 'Creating the glossary.aiff audio file.'
-cat glossary_p*.txt | say -o glossary.aiff
-afconvert -d 'aac ' -f 'mp4f' glossary.aiff
-
+# Detect OS and set TTS command
+detect_tts_command() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        TTS_CMD="say"
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        # Linux
+        if command -v spd-say &> /dev/null; then
+            TTS_CMD="spd-say"
+        else
+            echo "Error: spd-say not found. Please install speech-dispatcher."
+            exit 1
+        fi
+    else
+        echo "Unsupported OS: $OSTYPE"
+        exit 1
+    fi
+    
+    echo "Using TTS command: $TTS_CMD"
 }
 
+convert () {
+    # Detect TTS command at runtime
+    detect_tts_command
 
+    echo 'Please be patient! Depending on your system this will take 10 minutes!'
+    echo 'Creating the Introduction audio file.'
+    cat intro_p*.txt | $TTS_CMD -o introduction.aiff
+    afconvert -d 'aac ' -f 'mp4f' introduction.aiff
+
+    echo 'Creating the tablet1.aiff audio file.'
+    cat tablet1_p*.txt | $TTS_CMD -o tablet1.aiff
+    afconvert -d 'aac ' -f 'mp4f' tablet1.aiff
+
+    echo 'Creating the tablet2.aiff audio file.'
+    cat tablet2_p*.txt | $TTS_CMD -o tablet2.aiff
+    afconvert -d 'aac ' -f 'mp4f' tablet2.aiff
+
+    echo 'Creating the tablet3.aiff audio file.'
+    cat tablet3_p*.txt | $TTS_CMD -o tablet3.aiff
+    afconvert -d 'aac ' -f 'mp4f' tablet3.aiff
+
+    echo 'Creating the tablet4.aiff audio file.'
+    cat tablet4_p*.txt | $TTS_CMD -o tablet4.aiff
+    afconvert -d 'aac ' -f 'mp4f' tablet4.aiff
+
+    echo 'Creating the tablet5.aiff audio file.'
+    cat tablet5_p*.txt | $TTS_CMD -o tablet5.aiff
+    afconvert -d 'aac ' -f 'mp4f' tablet5.aiff
+
+    echo 'Creating the tablet6.aiff audio file.'
+    cat tablet6_p*.txt | $TTS_CMD -o tablet6.aiff
+    afconvert -d 'aac ' -f 'mp4f' tablet6.aiff
+
+    echo 'Creating the tablet7.aiff audio file.'
+    cat tablet7_p*.txt | $TTS_CMD -o tablet7.aiff
+    afconvert -d 'aac ' -f 'mp4f' tablet7.aiff
+
+    echo 'Creating the tablet8.aiff audio file.'
+    cat tablet8_p*.txt | $TTS_CMD -o tablet8.aiff
+    afconvert -d 'aac ' -f 'mp4f' tablet8.aiff
+
+    echo 'Creating the tablet9.aiff audio file.'
+    cat tablet9_p*.txt | $TTS_CMD -o tablet9.aiff
+    afconvert -d 'aac ' -f 'mp4f' tablet9.aiff
+
+    echo 'Creating the tablet10.aiff audio file.'
+    cat tablet10_p*.txt | $TTS_CMD -o tablet10.aiff
+    afconvert -d 'aac ' -f 'mp4f' tablet10.aiff
+
+    echo 'Creating the tablet11.aiff audio file.'
+    cat tablet11_p*.txt | $TTS_CMD -o tablet11.aiff
+    afconvert -d 'aac ' -f 'mp4f' tablet11.aiff
+
+    echo 'Creating the tablet12.aiff audio file.'
+    cat tablet12_p*.txt | $TTS_CMD -o tablet12.aiff
+    afconvert -d 'aac ' -f 'mp4f' tablet12.aiff
+
+    echo 'Creating the tablet13.aiff audio file.'
+    cat tablet13_p*.txt | $TTS_CMD -o tablet13.aiff
+    afconvert -d 'aac ' -f 'mp4f' tablet13.aiff
+ 
+    echo 'Creating the tablet14.aiff audio file.'
+    cat tablet14_p*.txt | $TTS_CMD -o tablet14.aiff
+    afconvert -d 'aac ' -f 'mp4f' tablet14.aiff
+
+    echo 'Creating the glossary.aiff audio file.'
+    cat glossary_p*.txt | $TTS_CMD -o glossary.aiff
+    afconvert -d 'aac ' -f 'mp4f' glossary.aiff
+}
 
 if [ "$1" != "" ]; then
     wl=(convert  help)
