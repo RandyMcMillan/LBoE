@@ -12,7 +12,7 @@ Commands:
 
     Open Terminal.App (for Mac)
     Navigate to the folder where this file is located
-    type into the command line "sudo ./converttoaiff convert" without quotes
+    type into the command line "./converttoaiff convert" without quotes
     Enter Password
     Wait...
     help       print this msg
