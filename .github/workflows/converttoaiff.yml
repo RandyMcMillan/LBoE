@@ -1,1 +1,44 @@
+name: Convert Text to AIFF
 
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/*_p*.txt'
+      - 'converttoaiff'
+      - '.github/workflows/converttoaiff.yml'
+  workflow_dispatch:
+
+jobs:
+  convert-audio:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y speech-dispatcher ffmpeg
+      
+      - name: Make converttoaiff executable
+        run: chmod +x converttoaiff
+      
+      - name: Run audio conversion
+        run: ./converttoaiff convert
+      
+      - name: List generated files
+        run: ls -lh *.m4a *.aiff *.wav 2>/dev/null || echo "No audio files generated"
+      
+      - name: Upload audio artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: audio-files
+          path: |
+            *.m4a
+            *.aiff
+            *.wav
+          retention-days: 30
