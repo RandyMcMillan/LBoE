@@ -67,7 +67,10 @@ convert () {
     
     # Function to wait for background jobs to stay under limit
     wait_for_job_slot() {
-        while [ $(jobs -r | wc -l) -ge $MAX_JOBS ]; do
+        local job_count
+        while true; do
+            job_count=$(jobs -r | wc -l | tr -d ' ')
+            [ "$job_count" -ge "$MAX_JOBS" ] || break
             sleep 0.5
         done
     }
