@@ -8,5 +8,7 @@
     
 
 ###### Navigate to /LBoE in the terminal
-    
-    $ ./converttoaiff convert
+
+'''shell    
+./converttoaiff convert
+'''
