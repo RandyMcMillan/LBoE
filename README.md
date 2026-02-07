@@ -7,6 +7,6 @@
 ###### Bash command to convert text to .aiff audio files. 
     
 
-######Navigate to /LBoE in the terminal
+###### Navigate to /LBoE in the terminal
     
     $ ./converttoaiff convert
