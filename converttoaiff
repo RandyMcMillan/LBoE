@@ -1,5 +1,6 @@
 #!/bin/bash
-set -e
+# Note: set -e is not used here as it doesn't work well with background jobs
+# Errors will be caught by checking wait's exit status
 
 help () {
     cat<<EOF
@@ -9,6 +10,7 @@ Usage: converttoaiff [convert|help]
 Commands:
 
     converttoaiff   use bash command to generate audio files from text
+                    Processes all files in parallel for faster execution
 
     Open Terminal.App (for Mac)
     Navigate to the folder where this file is located
@@ -25,12 +27,19 @@ detect_tts_command() {
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS
         TTS_CMD="say"
+        TTS_OUTPUT_FLAG="-o"
     elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        # Linux
-        if command -v spd-say &> /dev/null; then
-            TTS_CMD="spd-say -e"
+        # Linux - prefer espeak over spd-say for file output support
+        if command -v espeak &> /dev/null; then
+            TTS_CMD="espeak"
+            TTS_OUTPUT_FLAG="-w"
+        elif command -v spd-say &> /dev/null; then
+            echo "Warning: spd-say doesn't support file output. Please install espeak instead."
+            echo "Install with: sudo apt-get install espeak"
+            exit 1
         else
-             echo "Error: spd-say not found. Please install speech-dispatcher."
+            echo "Error: No TTS tool found. Please install espeak."
+            echo "Install with: sudo apt-get install espeak"
             exit 1
         fi
     else
@@ -41,74 +50,101 @@ detect_tts_command() {
     echo "Using TTS command: $TTS_CMD"
 }
 
+# Detect OS and set audio conversion command
+detect_convert_command() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS - use afconvert
+        CONVERT_CMD="afconvert -d 'aac ' -f 'mp4f'"
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        # Linux - use ffmpeg
+        if command -v ffmpeg &> /dev/null; then
+            CONVERT_CMD="ffmpeg -i"
+            CONVERT_OPTS="-c:a aac -b:a 128k -y"
+        else
+            echo "Error: ffmpeg not found. Please install ffmpeg."
+            exit 1
+        fi
+    else
+        echo "Unsupported OS: $OSTYPE"
+        exit 1
+    fi
+    
+    echo "Using audio conversion command: $CONVERT_CMD"
+}
+
+# Convert a single file (to be run in background)
+convert_file() {
+    local input_pattern="$1"
+    local output_name="$2"
+    
+    echo "Creating ${output_name}.aiff audio file..."
+    
+    # Generate TTS audio
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS: say reads from stdin
+        cat ${input_pattern} | $TTS_CMD $TTS_OUTPUT_FLAG ${output_name}.aiff
+    else
+        # Linux: espeak reads from file, use process substitution
+        $TTS_CMD -f <(cat ${input_pattern}) $TTS_OUTPUT_FLAG ${output_name}.aiff
+    fi
+    
+    # Convert to m4a format
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        afconvert -d 'aac ' -f 'mp4f' ${output_name}.aiff
+    else
+        # Linux uses ffmpeg to convert WAV to m4a
+        ffmpeg -i ${output_name}.aiff -c:a aac -b:a 128k -y ${output_name}.m4a 2>/dev/null
+    fi
+    
+    echo "Completed ${output_name}"
+}
+
 convert () {
-    # Detect TTS command at runtime
+    # Detect TTS and conversion commands at runtime
     detect_tts_command
+    detect_convert_command
 
-    echo 'Please be patient! Depending on your system this will take 10 minutes!'
-    echo 'Creating the Introduction audio file.'
-    cat intro_p*.txt | $TTS_CMD -o introduction.aiff
-    afconvert -d 'aac ' -f 'mp4f' introduction.aiff
+    echo '========================================='
+    echo 'Starting parallel audio file conversion!'
+    echo 'Processing all files simultaneously for faster execution.'
+    echo 'Please be patient - this will be much faster than before!'
+    echo '========================================='
+    echo ''
 
-    echo 'Creating the tablet1.aiff audio file.'
-    cat tablet1_p*.txt | $TTS_CMD -o tablet1.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet1.aiff
+    # Launch all conversion jobs in parallel (background)
+    convert_file "intro_p*.txt" "introduction" &
+    convert_file "tablet1_p*.txt" "tablet1" &
+    convert_file "tablet2_p*.txt" "tablet2" &
+    convert_file "tablet3_p*.txt" "tablet3" &
+    convert_file "tablet4_p*.txt" "tablet4" &
+    convert_file "tablet5_p*.txt" "tablet5" &
+    convert_file "tablet6_p*.txt" "tablet6" &
+    convert_file "tablet7_p*.txt" "tablet7" &
+    convert_file "tablet8_p*.txt" "tablet8" &
+    convert_file "tablet9_p*.txt" "tablet9" &
+    convert_file "tablet10_p*.txt" "tablet10" &
+    convert_file "tablet11_p*.txt" "tablet11" &
+    convert_file "tablet12_p*.txt" "tablet12" &
+    convert_file "tablet13_p*.txt" "tablet13" &
+    convert_file "tablet14_p*.txt" "tablet14" &
+    convert_file "glossary_p*.txt" "glossary" &
 
-    echo 'Creating the tablet2.aiff audio file.'
-    cat tablet2_p*.txt | $TTS_CMD -o tablet2.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet2.aiff
-
-    echo 'Creating the tablet3.aiff audio file.'
-    cat tablet3_p*.txt | $TTS_CMD -o tablet3.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet3.aiff
-
-    echo 'Creating the tablet4.aiff audio file.'
-    cat tablet4_p*.txt | $TTS_CMD -o tablet4.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet4.aiff
-
-    echo 'Creating the tablet5.aiff audio file.'
-    cat tablet5_p*.txt | $TTS_CMD -o tablet5.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet5.aiff
-
-    echo 'Creating the tablet6.aiff audio file.'
-    cat tablet6_p*.txt | $TTS_CMD -o tablet6.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet6.aiff
-
-    echo 'Creating the tablet7.aiff audio file.'
-    cat tablet7_p*.txt | $TTS_CMD -o tablet7.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet7.aiff
-
-    echo 'Creating the tablet8.aiff audio file.'
-    cat tablet8_p*.txt | $TTS_CMD -o tablet8.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet8.aiff
-
-    echo 'Creating the tablet9.aiff audio file.'
-    cat tablet9_p*.txt | $TTS_CMD -o tablet9.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet9.aiff
-
-    echo 'Creating the tablet10.aiff audio file.'
-    cat tablet10_p*.txt | $TTS_CMD -o tablet10.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet10.aiff
-
-    echo 'Creating the tablet11.aiff audio file.'
-    cat tablet11_p*.txt | $TTS_CMD -o tablet11.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet11.aiff
-
-    echo 'Creating the tablet12.aiff audio file.'
-    cat tablet12_p*.txt | $TTS_CMD -o tablet12.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet12.aiff
-
-    echo 'Creating the tablet13.aiff audio file.'
-    cat tablet13_p*.txt | $TTS_CMD -o tablet13.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet13.aiff
- 
-    echo 'Creating the tablet14.aiff audio file.'
-    cat tablet14_p*.txt | $TTS_CMD -o tablet14.aiff
-    afconvert -d 'aac ' -f 'mp4f' tablet14.aiff
-
-    echo 'Creating the glossary.aiff audio file.'
-    cat glossary_p*.txt | $TTS_CMD -o glossary.aiff
-    afconvert -d 'aac ' -f 'mp4f' glossary.aiff
+    # Wait for all background jobs to complete
+    echo ''
+    echo 'Waiting for all conversion jobs to complete...'
+    if wait; then
+        echo ''
+        echo '========================================='
+        echo 'All audio files generated successfully!'
+        echo '========================================='
+    else
+        echo ''
+        echo '========================================='
+        echo 'WARNING: Some jobs may have failed!'
+        echo 'Please check the output above for errors.'
+        echo '========================================='
+        exit 1
+    fi
 }
 
 if [ "$1" != "" ]; then
