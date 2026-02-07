@@ -1,44 +1,46 @@
-name: Convert Text to AIFF
+# Convert to AIFF
+
+name: Convert to AIFF
 
 on:
   push:
     branches:
-      - ma*
-    paths:
-      - '**/*_p*.txt'
-      - 'converttoaiff'
-      - '.github/workflows/converttoaiff.yml'
-  workflow_dispatch:
+      - master
 
 jobs:
-  convert-audio:
+  convert:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y espeak ffmpeg
-      
-      - name: Make converttoaiff executable
-        run: chmod +x converttoaiff
-      
-      - name: Run audio conversion
-        run: ./converttoaiff convert
-      
-      - name: List generated files
-        run: ls -lh *.m4a *.aiff *.wav 2>/dev/null || echo "No audio files generated"
-      
-      - name: Upload audio artifacts
-        uses: actions/upload-artifact@v4
-        if: always()
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          name: audio-files
-          path: |
-            *.m4a
-            *.aiff
-            *.wav
-          retention-days: 30
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Convert audio files to AIFF
+        run: |
+          set -e
+          echo "Starting audio conversion..."
+          npm run convert-to-aiff
+          echo "Audio conversion completed successfully!"
+
+      - name: Upload audio artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: aiff-files
+          path: path/to/aiff/files/*
+          retention-days: 2
+          if-no-files-found: error
+
+      - name: Debugging Info
+        run: |
+          echo "Debugging Info:"
+          echo "Timestamp: $(date)"
+          echo "Working Directory: $(pwd)"
+          echo "Files in artifact path:"; ls path/to/aiff/files/
