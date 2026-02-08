@@ -1,4 +1,4 @@
-name: Convert Text to AIFF
+name: Convert-Text to AIFF
 
 on:
   push:
