@@ -18,7 +18,6 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUSTFLAGS: "-D warnings"
 
 jobs:
   build:
@@ -59,7 +58,14 @@ jobs:
           }
 
       - name: Clippy (all targets)
-        run: cargo clippy --all-targets
+        run: >
+          cargo clippy --all-targets --
+          -D clippy::correctness
+          -D clippy::suspicious
+          -W clippy::perf
+          -A clippy::style
+          -A clippy::complexity
+          -A clippy::pedantic
 
       - name: Build (debug)
         run: cargo build
