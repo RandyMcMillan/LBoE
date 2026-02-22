@@ -102,12 +102,28 @@ cmd_default() {
         tag="v$(pkg_version)"
         echo "No git tag found, using Cargo.toml version: $tag"
     fi
+
+    echo "==> dist generate"
+    "$DIST_BIN" generate
+    echo ""
+
+    echo "==> git diff (CI manifest changes)"
+    git diff --stat
+    git diff
+    echo ""
+
+    echo "==> dist generate --check"
+    "$DIST_BIN" generate --check && echo "CI manifests are up to date."
+    echo ""
+
     echo "==> dist plan --tag=$tag"
     "$DIST_BIN" plan --tag="$tag"
     echo ""
+
     echo "==> dist build --tag=$tag"
     "$DIST_BIN" build --tag="$tag"
     echo ""
+
     echo "Artifacts: $REPO_ROOT/target/distrib/"
     ls -lh "$REPO_ROOT/target/distrib/" 2>/dev/null || true
 }
