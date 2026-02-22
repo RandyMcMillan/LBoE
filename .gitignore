@@ -5,5 +5,13 @@
 !*.txt
 !*.md
 !*.htm*
+!*.css
 !README*
 !convert*
+!Cargo.toml
+!Cargo.lock
+!src/
+!src/*.rs
+!.github/
+!.github/workflows/
+!.github/workflows/*.yml
