@@ -1,6 +1,8 @@
 *
 .aiff
 !.gitignore
+!.githooks
+!.githooks/pre-push
 !p*
 !*.txt
 !*.md
