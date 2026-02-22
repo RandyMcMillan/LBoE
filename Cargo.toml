@@ -1,6 +1,6 @@
 [package]
 name = "lboe"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "Lost Book of Enki - A TUI reader for Zecharia Sitchin's work"
 authors = ["RandyMcMillan"]
