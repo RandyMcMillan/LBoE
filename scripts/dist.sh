@@ -102,12 +102,46 @@ cmd_default() {
         tag="v$(pkg_version)"
         echo "No git tag found, using Cargo.toml version: $tag"
     fi
+
+    # Temporarily strip allow-dirty so dist generate always writes all CI files.
+    # This ensures manual edits show up in the diff before they're committed/pushed.
+    # We restore both Cargo.toml and any generated CI files afterwards so the
+    # working tree is left clean.
+    local toml_bak
+    toml_bak="$(mktemp)"
+    cp Cargo.toml "$toml_bak"
+    trap 'cp "$toml_bak" Cargo.toml; git checkout -- .github/ 2>/dev/null || true; rm -f "$toml_bak"' EXIT
+    sed -i '/^allow-dirty/d' Cargo.toml
+
+    echo "==> dist generate (allow-dirty bypassed)"
+    "$DIST_BIN" generate
+    echo ""
+
+    # Restore Cargo.toml so the diff only shows CI manifest changes.
+    cp "$toml_bak" Cargo.toml
+
+    echo "==> git diff (CI manifest changes)"
+    git diff --stat
+    git diff
+    echo ""
+
+    # Restore generated CI files — we only wanted to show the diff, not keep them.
+    git checkout -- .github/ 2>/dev/null || true
+    trap - EXIT
+    rm -f "$toml_bak"
+
+    echo "==> dist generate --check"
+    "$DIST_BIN" generate --check && echo "CI manifests are up to date."
+    echo ""
+
     echo "==> dist plan --tag=$tag"
     "$DIST_BIN" plan --tag="$tag"
     echo ""
+
     echo "==> dist build --tag=$tag"
     "$DIST_BIN" build --tag="$tag"
     echo ""
+
     echo "Artifacts: $REPO_ROOT/target/distrib/"
     ls -lh "$REPO_ROOT/target/distrib/" 2>/dev/null || true
 }
