@@ -8,7 +8,10 @@ license = "MIT"
 repository = "https://github.com/RandyMcMillan/LBoE"
 homepage = "https://github.com/RandyMcMillan/LBoE"
 
-[package.metadata.dist]
+[workspace]
+members = ["."]
+
+[workspace.metadata.dist]
 cargo-dist-version = "0.28.0"
 ci = ["github"]
 installers = ["shell", "powershell"]
