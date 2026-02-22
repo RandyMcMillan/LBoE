@@ -103,9 +103,22 @@ cmd_default() {
         echo "No git tag found, using Cargo.toml version: $tag"
     fi
 
-    echo "==> dist generate"
+    # Temporarily strip allow-dirty so dist generate always writes all CI files.
+    # This ensures manual edits show up in the diff before they're committed/pushed.
+    local toml_bak
+    toml_bak="$(mktemp)"
+    cp Cargo.toml "$toml_bak"
+    trap 'cp "$toml_bak" Cargo.toml; rm -f "$toml_bak"' EXIT
+    sed -i '/^allow-dirty/d' Cargo.toml
+
+    echo "==> dist generate (allow-dirty bypassed)"
     "$DIST_BIN" generate
     echo ""
+
+    # Restore immediately so the diff doesn't include the Cargo.toml change.
+    cp "$toml_bak" Cargo.toml
+    trap - EXIT
+    rm -f "$toml_bak"
 
     echo "==> git diff (CI manifest changes)"
     git diff --stat
