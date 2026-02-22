@@ -315,12 +315,12 @@ static GLOSSARY: &[&[u8]] = &[
 
 // ── Chapter catalogue ──────────────────────────────────────────────────────────
 
-struct Chapter {
-    title: &'static str,
-    pages: &'static [&'static [u8]],
+pub struct Chapter {
+    pub title: &'static str,
+    pub pages: &'static [&'static [u8]],
 }
 
-static CHAPTERS: &[Chapter] = &[
+pub static CHAPTERS: &[Chapter] = &[
     Chapter { title: "Introduction",  pages: INTRO    },
     Chapter { title: "Tablet  I",     pages: TABLET1  },
     Chapter { title: "Tablet  II",    pages: TABLET2  },
@@ -342,26 +342,23 @@ static CHAPTERS: &[Chapter] = &[
 // ── App state ──────────────────────────────────────────────────────────────────
 
 #[derive(PartialEq)]
-enum View {
+pub enum View {
     Toc,
     Reading,
 }
 
-struct App {
-    view: View,
-    toc_state: ListState,
-    // Reading state
-    chapter_idx: usize,
-    page_idx: usize,
-    scroll: usize,
-    // Cached wrapped lines for current page
-    wrapped_lines: Vec<String>,
-    // Scrollbar state
-    scrollbar_state: ScrollbarState,
+pub struct App {
+    pub view: View,
+    pub toc_state: ListState,
+    pub chapter_idx: usize,
+    pub page_idx: usize,
+    pub scroll: usize,
+    pub wrapped_lines: Vec<String>,
+    pub scrollbar_state: ScrollbarState,
 }
 
 impl App {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let mut toc_state = ListState::default();
         toc_state.select(Some(0));
         App {
@@ -375,7 +372,7 @@ impl App {
         }
     }
 
-    fn open_chapter(&mut self, chapter_idx: usize, content_width: u16) {
+    pub fn open_chapter(&mut self, chapter_idx: usize, content_width: u16) {
         self.chapter_idx = chapter_idx;
         self.page_idx = 0;
         self.scroll = 0;
@@ -383,7 +380,7 @@ impl App {
         self.rebuild_cache(content_width);
     }
 
-    fn rebuild_cache(&mut self, width: u16) {
+    pub fn rebuild_cache(&mut self, width: u16) {
         let raw = CHAPTERS[self.chapter_idx].pages[self.page_idx];
         let text = String::from_utf8_lossy(raw);
         self.wrapped_lines = wrap_text(&text, width as usize);
@@ -391,7 +388,7 @@ impl App {
         self.scrollbar_state = ScrollbarState::new(total).position(self.scroll);
     }
 
-    fn scroll_down(&mut self, content_height: usize) {
+    pub fn scroll_down(&mut self, content_height: usize) {
         let max = self.wrapped_lines.len().saturating_sub(content_height);
         if self.scroll < max {
             self.scroll += 1;
@@ -399,14 +396,14 @@ impl App {
         }
     }
 
-    fn scroll_up(&mut self) {
+    pub fn scroll_up(&mut self) {
         if self.scroll > 0 {
             self.scroll -= 1;
             self.scrollbar_state = self.scrollbar_state.position(self.scroll);
         }
     }
 
-    fn next_page(&mut self, content_width: u16) {
+    pub fn next_page(&mut self, content_width: u16) {
         let total_pages = CHAPTERS[self.chapter_idx].pages.len();
         if self.page_idx + 1 < total_pages {
             self.page_idx += 1;
@@ -415,7 +412,7 @@ impl App {
         }
     }
 
-    fn prev_page(&mut self, content_width: u16) {
+    pub fn prev_page(&mut self, content_width: u16) {
         if self.page_idx > 0 {
             self.page_idx -= 1;
             self.scroll = 0;
@@ -423,33 +420,37 @@ impl App {
         }
     }
 
-    fn toc_next(&mut self) {
+    pub fn toc_next(&mut self) {
         let i = self.toc_state.selected().unwrap_or(0);
         self.toc_state
             .select(Some((i + 1).min(CHAPTERS.len() - 1)));
     }
 
-    fn toc_prev(&mut self) {
+    pub fn toc_prev(&mut self) {
         let i = self.toc_state.selected().unwrap_or(0);
         self.toc_state.select(Some(i.saturating_sub(1)));
     }
 }
 
+impl Default for App {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 // ── Text wrapping ──────────────────────────────────────────────────────────────
 
-fn wrap_text(text: &str, width: usize) -> Vec<String> {
+pub fn wrap_text(text: &str, width: usize) -> Vec<String> {
     if width == 0 {
         return vec![];
     }
     let mut lines = Vec::new();
     for paragraph in text.split('\n') {
-        // Replace control chars / non-printable sequences
         let para = paragraph.replace('\r', "").replace('\u{FFFC}', "");
         if para.trim().is_empty() {
             lines.push(String::new());
             continue;
         }
-        // Simple word-wrap
         let mut current = String::new();
         let mut col = 0usize;
         for word in para.split_whitespace() {
@@ -476,29 +477,28 @@ fn wrap_text(text: &str, width: usize) -> Vec<String> {
 
 // ── Rendering ─────────────────────────────────────────────────────────────────
 
-const AMBER:  Color = Color::Rgb(255, 176, 0);
-const GOLD:   Color = Color::Rgb(212, 175, 55);
-const STONE:  Color = Color::Rgb(200, 185, 150);
-const DIM:    Color = Color::Rgb(120, 110, 80);
-const BG:     Color = Color::Rgb(18, 14, 8);
+const AMBER: Color = Color::Rgb(255, 176, 0);
+const GOLD:  Color = Color::Rgb(212, 175, 55);
+const STONE: Color = Color::Rgb(200, 185, 150);
+const DIM:   Color = Color::Rgb(120, 110, 80);
+const BG:    Color = Color::Rgb(18, 14, 8);
 
-fn render_toc(f: &mut Frame, app: &mut App) {
+pub fn render_toc(f: &mut Frame, app: &mut App) {
     let area = f.area();
 
-    // Outer block
     let outer = Block::default()
         .borders(Borders::ALL)
         .border_type(BorderType::Double)
         .border_style(Style::default().fg(GOLD))
         .title(Line::from(vec![
-            Span::styled(" ✦ ", Style::default().fg(AMBER)),
+            Span::styled(" \u{2726} ", Style::default().fg(AMBER)),
             Span::styled(
                 "THE LOST BOOK OF ENKI",
                 Style::default()
                     .fg(AMBER)
                     .add_modifier(Modifier::BOLD),
             ),
-            Span::styled(" ✦ ", Style::default().fg(AMBER)),
+            Span::styled(" \u{2726} ", Style::default().fg(AMBER)),
         ]))
         .title_alignment(Alignment::Center)
         .style(Style::default().bg(BG));
@@ -506,7 +506,6 @@ fn render_toc(f: &mut Frame, app: &mut App) {
     let inner = outer.inner(area);
     f.render_widget(outer, area);
 
-    // Layout: subtitle + list + footer
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -516,7 +515,6 @@ fn render_toc(f: &mut Frame, app: &mut App) {
         ])
         .split(inner);
 
-    // Subtitle
     let subtitle = Paragraph::new(Line::from(vec![Span::styled(
         "Memoirs and Prophecies of an Extraterrestrial God",
         Style::default().fg(STONE).add_modifier(Modifier::ITALIC),
@@ -524,7 +522,6 @@ fn render_toc(f: &mut Frame, app: &mut App) {
     .alignment(Alignment::Center);
     f.render_widget(subtitle, chunks[0]);
 
-    // Chapter list
     let items: Vec<ListItem> = CHAPTERS
         .iter()
         .enumerate()
@@ -565,13 +562,12 @@ fn render_toc(f: &mut Frame, app: &mut App) {
                 .bg(Color::Rgb(40, 30, 10))
                 .add_modifier(Modifier::BOLD),
         )
-        .highlight_symbol("▶ ");
+        .highlight_symbol("\u{25b6} ");
 
     f.render_stateful_widget(list, chunks[1], &mut app.toc_state);
 
-    // Footer
     let footer = Paragraph::new(Line::from(vec![
-        Span::styled(" ↑↓ ", Style::default().fg(AMBER)),
+        Span::styled(" \u{2191}\u{2193} ", Style::default().fg(AMBER)),
         Span::styled("Navigate  ", Style::default().fg(DIM)),
         Span::styled(" Enter ", Style::default().fg(AMBER)),
         Span::styled("Open  ", Style::default().fg(DIM)),
@@ -582,14 +578,13 @@ fn render_toc(f: &mut Frame, app: &mut App) {
     f.render_widget(footer, chunks[2]);
 }
 
-fn render_reading(f: &mut Frame, app: &mut App) {
+pub fn render_reading(f: &mut Frame, app: &mut App) {
     let area = f.area();
     let ch = &CHAPTERS[app.chapter_idx];
     let total_pages = ch.pages.len();
 
-    // Outer block
     let title_text = format!(
-        " {} — page {}/{} ",
+        " {} \u{2014} page {}/{} ",
         ch.title,
         app.page_idx + 1,
         total_pages
@@ -599,12 +594,12 @@ fn render_reading(f: &mut Frame, app: &mut App) {
         .border_type(BorderType::Double)
         .border_style(Style::default().fg(GOLD))
         .title(Line::from(vec![
-            Span::styled(" ✦ ", Style::default().fg(AMBER)),
+            Span::styled(" \u{2726} ", Style::default().fg(AMBER)),
             Span::styled(
                 title_text,
                 Style::default().fg(AMBER).add_modifier(Modifier::BOLD),
             ),
-            Span::styled("✦ ", Style::default().fg(AMBER)),
+            Span::styled("\u{2726} ", Style::default().fg(AMBER)),
         ]))
         .title_alignment(Alignment::Center)
         .style(Style::default().bg(BG));
@@ -612,7 +607,6 @@ fn render_reading(f: &mut Frame, app: &mut App) {
     let inner = outer.inner(area);
     f.render_widget(outer, area);
 
-    // Layout: content + footer
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Min(1), Constraint::Length(2)])
@@ -620,14 +614,12 @@ fn render_reading(f: &mut Frame, app: &mut App) {
 
     let content_area = chunks[0];
     let content_height = content_area.height as usize;
-    let content_width = content_area.width.saturating_sub(2); // leave room for scrollbar
+    let content_width = content_area.width.saturating_sub(2);
 
-    // Rebuild cache if width changed (resize)
     if app.wrapped_lines.is_empty() {
         app.rebuild_cache(content_width);
     }
 
-    // Slice visible lines
     let visible: Vec<Line> = app
         .wrapped_lines
         .iter()
@@ -652,13 +644,12 @@ fn render_reading(f: &mut Frame, app: &mut App) {
 
     f.render_widget(para, content_area);
 
-    // Scrollbar
     let total_lines = app.wrapped_lines.len();
     let scrollbar = Scrollbar::new(ScrollbarOrientation::VerticalRight)
-        .begin_symbol(Some("↑"))
-        .end_symbol(Some("↓"))
-        .track_symbol(Some("│"))
-        .thumb_symbol("█");
+        .begin_symbol(Some("\u{2191}"))
+        .end_symbol(Some("\u{2193}"))
+        .track_symbol(Some("\u{2502}"))
+        .thumb_symbol("\u{2588}");
 
     app.scrollbar_state = ScrollbarState::new(total_lines.saturating_sub(content_height))
         .position(app.scroll);
@@ -669,11 +660,10 @@ fn render_reading(f: &mut Frame, app: &mut App) {
         &mut app.scrollbar_state,
     );
 
-    // Footer
     let footer = Paragraph::new(Line::from(vec![
-        Span::styled(" ↑↓ ", Style::default().fg(AMBER)),
+        Span::styled(" \u{2191}\u{2193} ", Style::default().fg(AMBER)),
         Span::styled("Scroll  ", Style::default().fg(DIM)),
-        Span::styled(" ←→ ", Style::default().fg(AMBER)),
+        Span::styled(" \u{2190}\u{2192} ", Style::default().fg(AMBER)),
         Span::styled("Prev/Next Page  ", Style::default().fg(DIM)),
         Span::styled(" Esc ", Style::default().fg(AMBER)),
         Span::styled("Contents  ", Style::default().fg(DIM)),
@@ -684,16 +674,31 @@ fn render_reading(f: &mut Frame, app: &mut App) {
     f.render_widget(footer, chunks[1]);
 }
 
-// ── Main ───────────────────────────────────────────────────────────────────────
+// ── Entry point ───────────────────────────────────────────────────────────────
 
-fn main() -> Result<(), io::Error> {
-    // Terminal setup
+pub fn run_app() -> Result<(), io::Error> {
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
+    let result = event_loop(&mut terminal);
+
+    disable_raw_mode()?;
+    execute!(
+        terminal.backend_mut(),
+        LeaveAlternateScreen,
+        DisableMouseCapture
+    )?;
+    terminal.show_cursor()?;
+
+    result
+}
+
+fn event_loop<B: ratatui::backend::Backend>(
+    terminal: &mut Terminal<B>,
+) -> Result<(), io::Error> {
     let mut app = App::new();
     let mut last_width: u16 = 0;
 
@@ -705,10 +710,9 @@ fn main() -> Result<(), io::Error> {
             }
         })?;
 
-        // Track terminal width for reflow
         let current_width = terminal.size()?.width;
         if app.view == View::Reading && current_width != last_width {
-            let w = current_width.saturating_sub(4); // borders + scrollbar
+            let w = current_width.saturating_sub(4);
             app.rebuild_cache(w);
             last_width = current_width;
         }
@@ -763,15 +767,6 @@ fn main() -> Result<(), io::Error> {
             }
         }
     }
-
-    // Cleanup
-    disable_raw_mode()?;
-    execute!(
-        terminal.backend_mut(),
-        LeaveAlternateScreen,
-        DisableMouseCapture
-    )?;
-    terminal.show_cursor()?;
 
     Ok(())
 }
