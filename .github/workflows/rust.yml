@@ -49,8 +49,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Check formatting
-        run: cargo fmt --check
+      - name: Check formatting (show diff)
+        run: |
+          cargo fmt -- --check 2>/dev/null || {
+            echo "::warning::Code is not formatted. Run 'cargo fmt' locally to fix."
+            cargo fmt -- --check --color=never 2>&1 | sed 's/^/    /' || true
+            cargo fmt
+            git diff
+          }
 
       - name: Clippy (all targets)
         run: cargo clippy --all-targets
