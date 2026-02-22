@@ -8,8 +8,11 @@ license = "MIT"
 repository = "https://github.com/RandyMcMillan/LBoE"
 homepage = "https://github.com/RandyMcMillan/LBoE"
 
-[package.metadata.dist]
-cargo-dist-version = "0.28.0"
+[workspace]
+members = ["."]
+
+[workspace.metadata.dist]
+cargo-dist-version = "0.30.4"
 ci = ["github"]
 installers = ["shell", "powershell"]
 targets = [
@@ -25,6 +28,10 @@ allow-dirty = ["ci"]
 [[bin]]
 name = "lboe"
 path = "src/bin/lboe.rs"
+
+[profile.dist]
+inherits = "release"
+lto = "thin"
 
 [dependencies]
 ratatui = "0.29"

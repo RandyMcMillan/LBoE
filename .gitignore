@@ -17,3 +17,5 @@
 !.github/
 !.github/workflows/
 !.github/workflows/*.yml
+!scripts/
+!scripts/*.sh
