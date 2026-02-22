@@ -105,25 +105,30 @@ cmd_default() {
 
     # Temporarily strip allow-dirty so dist generate always writes all CI files.
     # This ensures manual edits show up in the diff before they're committed/pushed.
+    # We restore both Cargo.toml and any generated CI files afterwards so the
+    # working tree is left clean.
     local toml_bak
     toml_bak="$(mktemp)"
     cp Cargo.toml "$toml_bak"
-    trap 'cp "$toml_bak" Cargo.toml; rm -f "$toml_bak"' EXIT
+    trap 'cp "$toml_bak" Cargo.toml; git checkout -- .github/ 2>/dev/null || true; rm -f "$toml_bak"' EXIT
     sed -i '/^allow-dirty/d' Cargo.toml
 
     echo "==> dist generate (allow-dirty bypassed)"
     "$DIST_BIN" generate
     echo ""
 
-    # Restore immediately so the diff doesn't include the Cargo.toml change.
+    # Restore Cargo.toml so the diff only shows CI manifest changes.
     cp "$toml_bak" Cargo.toml
-    trap - EXIT
-    rm -f "$toml_bak"
 
     echo "==> git diff (CI manifest changes)"
     git diff --stat
     git diff
     echo ""
+
+    # Restore generated CI files — we only wanted to show the diff, not keep them.
+    git checkout -- .github/ 2>/dev/null || true
+    trap - EXIT
+    rm -f "$toml_bak"
 
     echo "==> dist generate --check"
     "$DIST_BIN" generate --check && echo "CI manifests are up to date."
