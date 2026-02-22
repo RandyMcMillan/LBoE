@@ -10,7 +10,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  DIST_VERSION: "0.28.0"
+  DIST_VERSION: "0.30.4"
 
 jobs:
   # Plan the release and determine which artifacts to build
