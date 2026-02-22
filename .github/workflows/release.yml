@@ -80,6 +80,7 @@ jobs:
         run: ${{ matrix.packages_install }}
 
       - name: Build
+        shell: bash
         run: |
           cargo dist build \
             --tag=${{ needs.plan.outputs.tag }} \
