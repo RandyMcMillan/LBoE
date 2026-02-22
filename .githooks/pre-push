@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# .githooks/pre-push — run dist check before every push
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+echo "pre-push: running ./scripts/dist.sh ..."
+"$REPO_ROOT/scripts/dist.sh"
