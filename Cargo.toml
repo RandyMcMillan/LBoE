@@ -22,6 +22,10 @@ targets = [
 pr-run-mode = "plan"
 allow-dirty = ["ci"]
 
+[[bin]]
+name = "lboe"
+path = "src/bin/lboe.rs"
+
 [dependencies]
 ratatui = "0.29"
 crossterm = "0.28"
