@@ -4,6 +4,23 @@ version = "0.1.0"
 edition = "2021"
 description = "Lost Book of Enki - A TUI reader for Zecharia Sitchin's work"
 authors = ["RandyMcMillan"]
+license = "MIT"
+repository = "https://github.com/RandyMcMillan/LBoE"
+homepage = "https://github.com/RandyMcMillan/LBoE"
+
+[package.metadata.dist]
+cargo-dist-version = "0.28.0"
+ci = ["github"]
+installers = ["shell", "powershell"]
+targets = [
+  "aarch64-apple-darwin",
+  "x86_64-apple-darwin",
+  "x86_64-unknown-linux-gnu",
+  "x86_64-unknown-linux-musl",
+  "x86_64-pc-windows-msvc",
+]
+pr-run-mode = "plan"
+allow-dirty = ["ci"]
 
 [[bin]]
 name = "lboe"
