@@ -23,6 +23,7 @@ targets = [
   "x86_64-pc-windows-msvc",
 ]
 pr-run-mode = "plan"
+allow-dirty = ["ci"]
 
 [[bin]]
 name = "lboe"
